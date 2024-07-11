@@ -1,0 +1,35 @@
+{
+  "name": "kewr-erp-be",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "prisma": {
+    "seed": "node seeders/seed.js"
+  },
+  "keywords": [],
+  "author": "Kewr-Erp",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/cors": "^9.0.1",
+    "@fastify/swagger": "^8.0.0",
+    "@fastify/swagger-ui": "^4.0.0",
+    "@prisma/client": "^5.16.1",
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.5",
+    "fastify": "^4.28.1",
+    "fastify-plugin": "^4.5.1",
+    "fastify-swagger": "^5.2.0",
+    "jsonwebtoken": "^9.0.2",
+    "nodemon": "^3.1.4",
+    "pg": "^8.12.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.16.1"
+  }
+}

@@ -1,0 +1,1530 @@
+basePath: /api/v1
+definitions:
+  accounting.CreateInvoiceRequest:
+    properties:
+      amount:
+        type: number
+      order_id:
+        type: string
+      status:
+        type: string
+    required:
+      - amount
+      - order_id
+      - status
+    type: object
+  api.ExampleResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  inventory.PICRequest:
+    properties:
+      user_id:
+        description: Define the request body fields here
+        type: integer
+      warehouse_id:
+        type: integer
+    required:
+      - user_id
+      - warehouse_id
+    type: object
+  inventory.PICResponse:
+    properties:
+      pic_id:
+        type: integer
+      user_id:
+        type: integer
+      warehouse_id:
+        type: integer
+    type: object
+  inventory.ProductInput:
+    properties:
+      product_name:
+        type: string
+      sku:
+        type: string
+      unit_price:
+        type: number
+    required:
+      - product_name
+      - sku
+      - unit_price
+    type: object
+  inventory.ProductOutput:
+    properties:
+      id:
+        type: integer
+      product_name:
+        type: string
+      sku:
+        type: string
+      unit_price:
+        type: number
+    type: object
+  inventory.ServiceInput:
+    properties:
+      service_code:
+        type: string
+      service_name:
+        type: string
+      unit_price:
+        type: number
+    required:
+      - service_code
+      - service_name
+      - unit_price
+    type: object
+  inventory.ServiceOutput:
+    properties:
+      id:
+        type: integer
+      service_code:
+        type: string
+      service_name:
+        type: string
+      unit_price:
+        type: number
+    type: object
+  models.Customer:
+    properties:
+      address:
+        type: string
+      credit_balance:
+        type: integer
+      customer_id:
+        type: string
+      customer_name:
+        type: string
+      customer_type:
+        type: string
+      email:
+        type: string
+      image:
+        type: string
+      phone:
+        type: string
+    type: object
+  models.Invoice:
+    properties:
+      amount:
+        type: number
+      invoice_date:
+        type: string
+      invoice_id:
+        type: string
+      order:
+        $ref: "#/definitions/models.Order"
+      order_id:
+        type: string
+      status:
+        type: string
+    type: object
+  models.Order:
+    properties:
+      customer:
+        $ref: "#/definitions/models.Customer"
+      customerID:
+        type: string
+      orderDate:
+        type: string
+      orderID:
+        type: string
+      orderStatus:
+        type: string
+      user:
+        $ref: "#/definitions/models.User"
+      userID:
+        type: string
+    type: object
+  models.Role:
+    properties:
+      role_id:
+        type: string
+      role_name:
+        type: string
+    type: object
+  models.Transaction:
+    properties:
+      amount:
+        type: number
+      order:
+        $ref: "#/definitions/models.Order"
+      orderID:
+        type: string
+      transactionDate:
+        type: string
+      transactionID:
+        type: string
+      transactionType:
+        type: string
+      user:
+        $ref: "#/definitions/models.User"
+      userID:
+        type: string
+    type: object
+  models.User:
+    properties:
+      account_name:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+      role:
+        $ref: "#/definitions/models.Role"
+      role_id:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+      username:
+        type: string
+    type: object
+  resource.CreateRoleRequest:
+    properties:
+      role_name:
+        type: string
+    required:
+      - role_name
+    type: object
+  resource.CreateUserRequest:
+    properties:
+      account_name:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+      role_id:
+        type: string
+      username:
+        type: string
+    required:
+      - account_name
+      - email
+      - password
+      - role_id
+      - username
+    type: object
+  resource.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  resource.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+      - password
+      - username
+    type: object
+  resource.LoginResponse:
+    properties:
+      message:
+        type: string
+      token:
+        type: string
+    type: object
+  resource.UpdateRoleRequest:
+    properties:
+      role_name:
+        type: string
+    required:
+      - role_name
+    type: object
+  resource.UpdateUserRequest:
+    properties:
+      account_name:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+      role_id:
+        type: string
+      username:
+        type: string
+    required:
+      - account_name
+      - email
+      - password
+      - role_id
+      - username
+    type: object
+  sales.CreateCustomerRequest:
+    properties:
+      address:
+        type: string
+      credit_balance:
+        type: integer
+      customer_name:
+        type: string
+      customer_type:
+        type: string
+      email:
+        type: string
+      image:
+        type: string
+      phone:
+        type: string
+    required:
+      - address
+      - customer_name
+      - customer_type
+    type: object
+  sales.UpdateCustomerRequest:
+    properties:
+      address:
+        type: string
+      credit_balance:
+        type: integer
+      customer_name:
+        type: string
+      customer_type:
+        type: string
+      email:
+        type: string
+      image:
+        type: string
+      phone:
+        type: string
+    required:
+      - address
+      - customer_name
+      - customer_type
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: hendri@kewr-digital.com
+    name: Hendri Sulistya
+  description: This is the API documentation for Kewr-ERP.
+  title: Kewr-ERP API
+  version: "1.0"
+paths:
+  /customers:
+    get:
+      description: Retrieve all customers from the database
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: "#/definitions/models.Customer"
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Retrieve all customers
+      tags:
+        - Customers
+    post:
+      consumes:
+        - application/json
+      description: Create a new customer with the provided details
+      parameters:
+        - description: Customer details
+          in: body
+          name: customer
+          required: true
+          schema:
+            $ref: "#/definitions/sales.CreateCustomerRequest"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/models.Customer"
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Create a new customer
+      tags:
+        - Customers
+  /customers/{id}:
+    delete:
+      description: Delete a customer from the database by its ID
+      parameters:
+        - description: Customer ID
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Delete a customer
+      tags:
+        - Customers
+    get:
+      description: Retrieve a customer from the database by its ID
+      parameters:
+        - description: Customer ID
+          in: path
+          name: id
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/models.Customer"
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Retrieve a customer by ID
+      tags:
+        - Customers
+    put:
+      consumes:
+        - application/json
+      description: Update the details of an existing customer
+      parameters:
+        - description: Customer ID
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: Updated customer details
+          in: body
+          name: customer
+          required: true
+          schema:
+            $ref: "#/definitions/sales.UpdateCustomerRequest"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/models.Customer"
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Update an existing customer
+      tags:
+        - Customers
+  /example:
+    get:
+      consumes:
+        - application/json
+      description: This is an example endpoint
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/api.ExampleResponse"
+      summary: Example Endpoint
+      tags:
+        - example
+  /invoices:
+    get:
+      description: Retrieve all invoices from the database
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: "#/definitions/models.Invoice"
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Retrieve all invoices
+      tags:
+        - Invoices
+    post:
+      consumes:
+        - application/json
+      description: Create a new invoice with the provided details
+      parameters:
+        - description: Invoice details
+          in: body
+          name: invoice
+          required: true
+          schema:
+            $ref: "#/definitions/accounting.CreateInvoiceRequest"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/models.Invoice"
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new invoice
+      tags:
+        - Invoices
+  /invoices/{id}:
+    delete:
+      description: Delete an invoice from the database by its ID
+      parameters:
+        - description: Invoice ID
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete an invoice
+      tags:
+        - Invoices
+    get:
+      description: Retrieve an invoice from the database by its ID
+      parameters:
+        - description: Invoice ID
+          in: path
+          name: id
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/models.Invoice"
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Retrieve an invoice by ID
+      tags:
+        - Invoices
+    put:
+      consumes:
+        - application/json
+      description: Update the details of an existing invoice
+      parameters:
+        - description: Invoice ID
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: Updated invoice details
+          in: body
+          name: invoice
+          required: true
+          schema:
+            $ref: "#/definitions/accounting.CreateInvoiceRequest"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/models.Invoice"
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update an existing invoice
+      tags:
+        - Invoices
+  /login:
+    post:
+      consumes:
+        - application/json
+      description: Authenticate user and return a JWT token
+      parameters:
+        - description: Login credentials
+          in: body
+          name: login
+          required: true
+          schema:
+            $ref: "#/definitions/resource.LoginRequest"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/resource.LoginResponse"
+        "400":
+          description: Bad Request
+          schema:
+            $ref: "#/definitions/resource.ErrorResponse"
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/resource.ErrorResponse"
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/resource.ErrorResponse"
+      summary: Login a user
+      tags:
+        - Auth
+  /pics:
+    get:
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: "#/definitions/inventory.PICResponse"
+            type: array
+      summary: Retrieve all PICs
+      tags:
+        - pics
+    post:
+      consumes:
+        - application/json
+      parameters:
+        - description: PIC object to be created
+          in: body
+          name: pic
+          required: true
+          schema:
+            $ref: "#/definitions/inventory.PICRequest"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/inventory.PICResponse"
+      summary: Create a new PIC
+      tags:
+        - pics
+  /pics/{id}:
+    delete:
+      parameters:
+        - description: PIC ID
+          in: path
+          name: id
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: PIC deleted
+          schema:
+            type: string
+      summary: Delete a PIC
+      tags:
+        - pics
+    get:
+      parameters:
+        - description: PIC ID
+          in: path
+          name: id
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/inventory.PICResponse"
+      summary: Retrieve a PIC by ID
+      tags:
+        - pics
+    put:
+      consumes:
+        - application/json
+      parameters:
+        - description: PIC ID
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: Updated PIC object
+          in: body
+          name: pic
+          required: true
+          schema:
+            $ref: "#/definitions/inventory.PICRequest"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/inventory.PICResponse"
+      summary: Update an existing PIC
+      tags:
+        - pics
+  /products:
+    get:
+      description: Retrieve all products from the database
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: "#/definitions/inventory.ProductOutput"
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Get all products
+      tags:
+        - Products
+    post:
+      consumes:
+        - application/json
+      description: Add a new product to the database
+      parameters:
+        - description: Product
+          in: body
+          name: product
+          required: true
+          schema:
+            $ref: "#/definitions/inventory.ProductInput"
+      produces:
+        - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: "#/definitions/inventory.ProductOutput"
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Create a new product
+      tags:
+        - Products
+  /products/{id}:
+    delete:
+      description: Delete a product from the database by its ID
+      parameters:
+        - description: Product ID
+          in: path
+          name: id
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Delete a product
+      tags:
+        - Products
+    get:
+      description: Retrieve a product from the database by its ID
+      parameters:
+        - description: Product ID
+          in: path
+          name: id
+          required: true
+          type: integer
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/inventory.ProductOutput"
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Get a product by ID
+      tags:
+        - Products
+    put:
+      consumes:
+        - application/json
+      description: Update a product in the database
+      parameters:
+        - description: Product ID
+          in: path
+          name: id
+          required: true
+          type: integer
+        - description: Product
+          in: body
+          name: product
+          required: true
+          schema:
+            $ref: "#/definitions/inventory.ProductInput"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/inventory.ProductOutput"
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Update a product
+      tags:
+        - Products
+  /roles:
+    get:
+      description: Retrieve all roles from the database
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: "#/definitions/models.Role"
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Retrieve all roles
+      tags:
+        - Roles
+    post:
+      consumes:
+        - application/json
+      description: Create a new role with the provided details
+      parameters:
+        - description: Role details
+          in: body
+          name: role
+          required: true
+          schema:
+            $ref: "#/definitions/resource.CreateRoleRequest"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/models.Role"
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Create a new role
+      tags:
+        - Roles
+  /roles/{id}:
+    delete:
+      description: Delete a role from the database by its ID
+      parameters:
+        - description: Role ID
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Delete a role
+      tags:
+        - Roles
+    get:
+      description: Retrieve a role from the database by its ID
+      parameters:
+        - description: Role ID
+          in: path
+          name: id
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/models.Role"
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Retrieve a role by ID
+      tags:
+        - Roles
+    put:
+      consumes:
+        - application/json
+      description: Update the details of an existing role
+      parameters:
+        - description: Role ID
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: Updated role details
+          in: body
+          name: role
+          required: true
+          schema:
+            $ref: "#/definitions/resource.UpdateRoleRequest"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/models.Role"
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Update an existing role
+      tags:
+        - Roles
+  /services:
+    get:
+      description: Retrieve all services from the database
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: "#/definitions/inventory.ServiceOutput"
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Get all services
+      tags:
+        - Services
+    post:
+      consumes:
+        - application/json
+      description: Add a new service to the database
+      parameters:
+        - description: Service
+          in: body
+          name: service
+          required: true
+          schema:
+            $ref: "#/definitions/inventory.ServiceInput"
+      produces:
+        - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: "#/definitions/inventory.ServiceOutput"
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Create a new service
+      tags:
+        - Services
+  /services/{id}:
+    delete:
+      description: Delete a service from the database by its ID
+      parameters:
+        - description: Service ID
+          in: path
+          name: id
+          required: true
+          type: integer
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Delete a service
+      tags:
+        - Services
+    get:
+      description: Retrieve a service from the database by its ID
+      parameters:
+        - description: Service ID
+          in: path
+          name: id
+          required: true
+          type: integer
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/inventory.ServiceOutput"
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Get a service by ID
+      tags:
+        - Services
+    put:
+      consumes:
+        - application/json
+      description: Update a service in the database
+      parameters:
+        - description: Service ID
+          in: path
+          name: id
+          required: true
+          type: integer
+        - description: Service
+          in: body
+          name: service
+          required: true
+          schema:
+            $ref: "#/definitions/inventory.ServiceInput"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/inventory.ServiceOutput"
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Update a service
+      tags:
+        - Services
+  /transactions:
+    get:
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: "#/definitions/models.Transaction"
+            type: array
+      security:
+        - BearerAuth: []
+      summary: Retrieve all transactions
+      tags:
+        - transactions
+    post:
+      consumes:
+        - application/json
+      parameters:
+        - description: Transaction object to be created
+          in: body
+          name: transaction
+          required: true
+          schema:
+            $ref: "#/definitions/models.Transaction"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/models.Transaction"
+      security:
+        - BearerAuth: []
+      summary: Create a new transaction
+      tags:
+        - transactions
+  /transactions/{id}:
+    delete:
+      parameters:
+        - description: Transaction ID
+          in: path
+          name: id
+          required: true
+          type: integer
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Transaction deleted
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      summary: Delete a transaction
+      tags:
+        - transactions
+    get:
+      parameters:
+        - description: Transaction ID
+          in: path
+          name: id
+          required: true
+          type: integer
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/models.Transaction"
+      security:
+        - BearerAuth: []
+      summary: Retrieve a transaction by ID
+      tags:
+        - transactions
+    put:
+      consumes:
+        - application/json
+      parameters:
+        - description: Transaction ID
+          in: path
+          name: id
+          required: true
+          type: integer
+        - description: Updated transaction object
+          in: body
+          name: transaction
+          required: true
+          schema:
+            $ref: "#/definitions/models.Transaction"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/models.Transaction"
+      security:
+        - BearerAuth: []
+      summary: Update an existing transaction
+      tags:
+        - transactions
+  /users:
+    get:
+      description: Retrieve all users from the database
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: "#/definitions/models.User"
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Retrieve all users
+      tags:
+        - Users
+    post:
+      consumes:
+        - application/json
+      description: Create a new user with the provided details
+      parameters:
+        - description: User details
+          in: body
+          name: user
+          required: true
+          schema:
+            $ref: "#/definitions/resource.CreateUserRequest"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/models.User"
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Create a new user
+      tags:
+        - Users
+  /users/{id}:
+    delete:
+      description: Delete a user from the database by its ID
+      parameters:
+        - description: User ID
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Delete a user
+      tags:
+        - Users
+    get:
+      description: Retrieve a user from the database by its ID
+      parameters:
+        - description: User ID
+          in: path
+          name: id
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/models.User"
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Retrieve a user by ID
+      tags:
+        - Users
+    put:
+      consumes:
+        - application/json
+      description: Update the details of an existing user
+      parameters:
+        - description: User ID
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: Updated user details
+          in: body
+          name: user
+          required: true
+          schema:
+            $ref: "#/definitions/resource.UpdateUserRequest"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/models.User"
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+        - BearerAuth: []
+      summary: Update an existing user
+      tags:
+        - Users
+schemes:
+  - http
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

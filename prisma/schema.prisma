@@ -1,0 +1,200 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  role_id   String @id @default(uuid())
+  role_name String
+  users User[]
+}
+
+model User {
+  user_id      Int    @id @default(autoincrement())
+  username     String @unique
+  password     String
+  role_id      String
+  account_name String
+  email        String   
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  role           Role                @relation(fields: [role_id], references: [role_id])
+  orders         Order[]
+  approvals      ApprovalLog[]
+  pics           PIC[]
+  expenses       Expense[]
+  notifications  UserNotification[]
+  transactions   Transaction[]      
+}
+
+model Customer {
+  id             Int @id @default(autoincrement())
+  customer_id    String
+  customer_name  String
+  customer_type  String
+  image          String
+  address        String
+  phone          String
+  email          String @unique
+  credit_balance Float
+
+  orders Order[]
+}
+
+model Product {
+  id            Int    @id @default(autoincrement())
+  sku           String @unique
+  product_name  String
+  unit_price    Float
+  purchase_orders PurchaseOrder[] 
+}
+
+model Service {
+  id            Int    @id @default(autoincrement())
+  service_code  String @unique
+  service_name  String
+  unit_price    Float
+}
+
+model Order {
+  order_id     String   @id @default(uuid())
+  order_date   DateTime @default(now())
+  customer_id  Int
+  user_id      Int
+  order_status String
+  
+  customer     Customer     @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [user_id], references: [user_id])
+  items        OrderItem[]
+  approvals    ApprovalLog[]
+  payments     PaymentHistory[]
+  transactions Transaction[]
+  invoices     Invoice[]
+}
+
+model OrderItem {
+  order_item_id Int    @id @default(autoincrement())
+  order_id      String
+  item_type     String
+  item_id       String
+  quantity      Int
+  unit_price    Float
+
+  order Order @relation(fields: [order_id], references: [order_id])
+}
+
+model ApprovalLog {
+  log_id        String   @id @default(uuid())
+  order_id      String
+  approval_date DateTime @default(now())
+  user_id       Int
+  status        Boolean
+
+  order Order @relation(fields: [order_id], references: [order_id])
+  user  User  @relation(fields: [user_id], references: [user_id])
+}
+
+model PaymentHistory {
+  payment_id   String   @id @default(uuid())
+  order_id     String
+  amount_paid  Float
+  payment_date DateTime @default(now())
+
+  order Order @relation(fields: [order_id], references: [order_id])
+}
+
+model Warehouse {
+  warehouse_id   String @id @default(uuid())
+  warehouse_name String
+  location       String
+
+  pics            PIC[]
+  purchase_orders PurchaseOrder[]
+}
+
+model PIC {
+  pic_id       String @id @default(uuid())
+  user_id      Int
+  warehouse_id String
+
+  user      User      @relation(fields: [user_id], references: [user_id])
+  warehouse Warehouse @relation(fields: [warehouse_id], references: [warehouse_id])
+}
+
+model Vendor {
+  vendor_id         String @id @default(uuid())
+  vendor_name       String
+  vendor_address    String
+  vendor_phone      String
+  vendor_tax_number String
+
+  purchase_orders PurchaseOrder[]
+}
+
+model PurchaseOrder {
+  purchase_order_id String @id @default(uuid())
+  product_id        Int
+  sku               String
+  vendor_id         String
+  warehouse_id      String
+  quantity          Int
+  order_date        DateTime @default(now())
+
+  product   Product   @relation(fields: [product_id], references: [id])
+  vendor    Vendor    @relation(fields: [vendor_id], references: [vendor_id])
+  warehouse Warehouse @relation(fields: [warehouse_id], references: [warehouse_id])
+}
+
+model Transaction {
+  transaction_id   String   @id @default(uuid())
+  transaction_date DateTime @default(now())
+  order_id         String
+  user_id          Int
+  amount           Float
+  transaction_type String
+
+  user  User  @relation(fields: [user_id], references: [user_id])
+  order Order @relation(fields: [order_id], references: [order_id])
+}
+
+model Invoice {
+  invoice_id   String   @id @default(uuid())
+  order_id     String
+  invoice_date DateTime @default(now())
+  amount       Float
+  status       String
+
+  order Order @relation(fields: [order_id], references: [order_id])
+}
+
+model UserNotification {
+  notification_id   String @id @default(uuid())
+  user_id           Int
+  notification_type String
+  is_enabled        Boolean @default(true)
+
+  user User @relation(fields: [user_id], references: [user_id])
+}
+
+model Expense {
+  id           Int  @id @default(autoincrement())
+  expense_id   String
+  expense_name String
+  description  String
+  amount       Float
+  expense_date DateTime
+  category     String
+  user_id      Int
+
+  user User @relation(fields: [user_id], references: [user_id])
+}
+
+model PrefixSequence {
+  prefix           String @id
+  current_sequence Int    @default(0)
+}
