@@ -23,13 +23,13 @@ const expensesSchema = {
       "user_id",
     ],
     properties: {
-      address: { type: "string" },
-      credit_balance: { type: "number" },
-      customer_name: { type: "string" },
-      customer_type: { type: "string" },
-      email: { type: "string" },
-      image: { type: "string" },
-      phone: { type: "string" },
+      expense_id: { type: "string" },
+      expense_name: { type: "string" },
+      description: { type: "string" },
+      amount: { type: "number" },
+      expense_date: { type: "number" },
+      category: { type: "string" },
+      user_id: { type: "number" },
     },
   },
   response: {
@@ -42,14 +42,13 @@ const expensesSchema = {
         user: {
           type: "object",
           properties: {
-            customer_id: { type: "number" },
-            address: { type: "string" },
-            credit_balance: { type: "number" },
-            customer_name: { type: "string" },
-            customer_type: { type: "string" },
-            email: { type: "string" },
-            image: { type: "string" },
-            phone: { type: "string" },
+            expense_id: { type: "string" },
+            expense_name: { type: "string" },
+            description: { type: "string" },
+            amount: { type: "number" },
+            expense_date: { type: "number" },
+            category: { type: "string" },
+            user_id: { type: "number" },
           },
         },
       },
@@ -88,14 +87,14 @@ const expensesResponseSchema = {
       items: {
         type: "object",
         properties: {
-          customer_id: { type: "number" },
-          address: { type: "string" },
-          credit_balance: { type: "number" },
-          customer_name: { type: "string" },
-          customer_type: { type: "string" },
-          email: { type: "string" },
-          image: { type: "string" },
-          phone: { type: "string" },
+          id: { type: "number" },
+          expense_id: { type: "string" },
+          expense_name: { type: "string" },
+          description: { type: "string" },
+          amount: { type: "number" },
+          expense_date: { type: "number" },
+          category: { type: "string" },
+          user_id: { type: "number" },
         },
       },
     },
@@ -131,14 +130,13 @@ const deleteExpensesResponseSchema = {
       description: "Successful deletion",
       type: "object",
       properties: {
-        customer_id: { type: "number" },
-        address: { type: "string" },
-        credit_balance: { type: "number" },
-        customer_name: { type: "string" },
-        customer_type: { type: "string" },
-        email: { type: "string" },
-        image: { type: "string" },
-        phone: { type: "string" },
+        expense_id: { type: "string" },
+        expense_name: { type: "string" },
+        description: { type: "string" },
+        amount: { type: "number" },
+        expense_date: { type: "number" },
+        category: { type: "string" },
+        user_id: { type: "number" },
       },
     },
     400: {
@@ -163,7 +161,7 @@ const deleteExpensesResponseSchema = {
       },
     },
     404: {
-      description: "Customer not found",
+      description: "expense not found",
       type: "object",
       properties: {
         error: { type: "string" },
@@ -190,7 +188,9 @@ export default fp(function (fastify, opts, done) {
   );
 
   fastify.post("/expenses", { schema: expensesSchema }, async (req, res) => {
-    const { expense_id, ...newExpense } = req.body;
+    const { id, expense_date, ...newExpense } = req.body;
+    newExpense.expense_date = new Date(expense_date);
+
     try {
       const createdExpense = await prisma.expense.create({
         data: newExpense,
@@ -204,31 +204,26 @@ export default fp(function (fastify, opts, done) {
     }
   });
 
-  fastify.put(
-    "/expenses/:expenseId",
-    { schema: expensesSchema },
-    async (req, res) => {
-      const { expenseId } = req.params;
-      const updatedExpense = req.body;
+  fastify.put("/expenses/:id", { schema: expensesSchema }, async (req, res) => {
+    const { id } = req.params;
+    const { expense_date, ...updatedExpense } = req.body;
+    updatedExpense.expense_date = new Date(expense_date);
 
-      try {
-        const expense = await prisma.expense.update({
-          where: { expense_id: Number(expenseId) },
-          data: updatedExpense,
-        });
+    try {
+      const expense = await prisma.expense.update({
+        where: { id: Number(id) },
+        data: updatedExpense,
+      });
 
-        res.code(200).send({
-          message: "Expense updated successfully",
-          customer,
-        });
-      } catch (error) {
-        console.error("Error updating expense:", error);
-        res
-          .code(500)
-          .send({ error: "An error occurred while updating expense" });
-      }
+      res.code(200).send({
+        message: "Expense updated successfully",
+        expense,
+      });
+    } catch (error) {
+      console.error("Error updating expense:", error);
+      res.code(500).send({ error: "An error occurred while updating expense" });
     }
-  );
+  });
 
   fastify.delete(
     "/expenses/:expenseId",
@@ -238,7 +233,7 @@ export default fp(function (fastify, opts, done) {
 
       try {
         const deletedExpense = await prisma.expense.delete({
-          where: { expense_id: Number(expenseId) },
+          where: { id: Number(expenseId) },
         });
 
         res.code(200).send(deletedExpense);

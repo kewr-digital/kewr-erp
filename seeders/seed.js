@@ -1,207 +1,212 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
 const prisma = new PrismaClient();
 
 async function main() {
-  // Create Roles
-  const adminRole = await prisma.role.create({
-    data: {
-      role_name: "Admin",
-    },
+  // Clear existing data in the correct order to avoid foreign key constraint issues
+  await prisma.orderItem.deleteMany({});
+  await prisma.approvalLog.deleteMany({});
+  await prisma.paymentHistory.deleteMany({});
+  await prisma.invoice.deleteMany({});
+  await prisma.transaction.deleteMany({});
+  await prisma.userNotification.deleteMany({});
+  await prisma.order.deleteMany({});
+  await prisma.purchaseOrder.deleteMany({});
+  await prisma.expense.deleteMany({});
+  await prisma.pIC.deleteMany({});
+  await prisma.warehouse.deleteMany({});
+  await prisma.product.deleteMany({});
+  await prisma.service.deleteMany({});
+  await prisma.vendor.deleteMany({});
+  await prisma.customer.deleteMany({});
+  await prisma.user.deleteMany({});
+  await prisma.role.deleteMany({});
+  await prisma.prefixSequence.deleteMany({});
+
+  // Seeder for Role
+  await prisma.role.createMany({
+    data: [
+      { role_id: "ROLE001", role_name: "Admin" },
+      { role_id: "ROLE002", role_name: "User" },
+    ],
   });
 
-  const userRole = await prisma.role.create({
-    data: {
-      role_name: "User",
-    },
+  const adminRole = await prisma.role.findFirst({
+    where: { role_name: "Admin" },
+  });
+  const userRole = await prisma.role.findFirst({
+    where: { role_name: "User" },
   });
 
-  // Create Users
-  const adminUser = await prisma.user.create({
-    data: {
-      username: "admin",
-      password: "adminpassword", // Make sure to hash passwords in a real application
-      role_id: adminRole.role_id,
-      account_name: "Admin Account",
-      email: "admin@example.com",
-    },
+  // Hash passwords
+  const hashedAdminPassword = await bcrypt.hash("admin", 10);
+  const hashedUserPassword = await bcrypt.hash("user", 10);
+
+  // Seeder for User
+  await prisma.user.createMany({
+    data: [
+      {
+        user_id: "USER001",
+        username: "admin",
+        password: hashedAdminPassword,
+        role_id: adminRole.role_id,
+        account_name: "Admin Account",
+        email: "admin@example.com",
+      },
+      {
+        user_id: "USER002",
+        username: "user",
+        password: hashedUserPassword,
+        role_id: userRole.role_id,
+        account_name: "User Account",
+        email: "user@example.com",
+      },
+    ],
   });
 
-  const normalUser = await prisma.user.create({
-    data: {
-      username: "user",
-      password: "userpassword", // Make sure to hash passwords in a real application
-      role_id: userRole.role_id,
-      account_name: "User Account",
-      email: "user@example.com",
-    },
+  // Seeder for Customer
+  await prisma.customer.createMany({
+    data: [
+      {
+        customer_id: "CUST001",
+        customer_name: "Customer One",
+        customer_type: "Corporate",
+        image: "customer1.jpg",
+        address: "123 Main St",
+        phone: "123-456-7890",
+        email: "customer1@example.com",
+        credit_balance: 1000.0,
+      },
+      {
+        customer_id: "CUST002",
+        customer_name: "Customer Two",
+        customer_type: "Individual",
+        image: "customer2.jpg",
+        address: "456 Elm St",
+        phone: "987-654-3210",
+        email: "customer2@example.com",
+        credit_balance: 500.0,
+      },
+    ],
   });
 
-  // Create Customers
-  const customer1 = await prisma.customer.create({
-    data: {
-      customer_id: "CUST001",
-      customer_name: "Customer One",
-      customer_type: "Type A",
-      image: "image1.png",
-      address: "Address 1",
-      phone: "1234567890",
-      email: "customer1@example.com",
-      credit_balance: 100.0,
-    },
+  // Seeder for Product
+  await prisma.product.createMany({
+    data: [
+      {
+        sku: "PROD001",
+        product_name: "Product One",
+        unit_price: 100.0,
+      },
+      {
+        sku: "PROD002",
+        product_name: "Product Two",
+        unit_price: 150.0,
+      },
+    ],
   });
 
-  const customer2 = await prisma.customer.create({
-    data: {
-      customer_id: "CUST002",
-      customer_name: "Customer Two",
-      customer_type: "Type B",
-      image: "image2.png",
-      address: "Address 2",
-      phone: "0987654321",
-      email: "customer2@example.com",
-      credit_balance: 200.0,
-    },
+  // Seeder for Service
+  await prisma.service.createMany({
+    data: [
+      {
+        service_code: "SERV001",
+        service_name: "Service One",
+        unit_price: 200.0,
+        customer_id: 1, // Ensure this matches the appropriate customer ID
+      },
+      {
+        service_code: "SERV002",
+        service_name: "Service Two",
+        unit_price: 250.0,
+        customer_id: 2, // Ensure this matches the appropriate customer ID
+      },
+    ],
   });
 
-  // Create Products
-  const product1 = await prisma.product.create({
-    data: {
-      sku: "PROD001",
-      product_name: "Product One",
-      unit_price: 50.0,
-    },
+  // Seeder for Warehouse
+  await prisma.warehouse.createMany({
+    data: [
+      {
+        warehouse_id: "WH001",
+        warehouse_name: "Main Warehouse",
+        location: "Warehouse Location 1",
+      },
+      {
+        warehouse_id: "WH002",
+        warehouse_name: "Secondary Warehouse",
+        location: "Warehouse Location 2",
+      },
+    ],
   });
 
-  const product2 = await prisma.product.create({
-    data: {
-      sku: "PROD002",
-      product_name: "Product Two",
-      unit_price: 75.0,
-    },
+  // Seeder for Vendor
+  await prisma.vendor.createMany({
+    data: [
+      {
+        vendor_id: "VEND001",
+        vendor_name: "Vendor One",
+        vendor_address: "Vendor Address 1",
+        vendor_phone: "111-222-3333",
+        vendor_tax_number: "TAX001",
+      },
+      {
+        vendor_id: "VEND002",
+        vendor_name: "Vendor Two",
+        vendor_address: "Vendor Address 2",
+        vendor_phone: "444-555-6666",
+        vendor_tax_number: "TAX002",
+      },
+    ],
   });
 
-  // Create Orders
-  const order1 = await prisma.order.create({
-    data: {
-      customer_id: customer1.id,
-      user_id: adminUser.user_id,
-      order_status: "Pending",
-    },
+  // Seeder for Purchase Order
+  await prisma.purchaseOrder.createMany({
+    data: [
+      {
+        purchase_order_id: "PO001",
+        product_id: 1, // Ensure this matches the appropriate product ID
+        vendor_id: 1, // Ensure this matches the appropriate vendor ID
+        warehouse_id: 1, // Ensure this matches the appropriate warehouse ID
+        quantity: 50,
+        order_date: new Date(),
+      },
+      {
+        purchase_order_id: "PO002",
+        product_id: 2, // Ensure this matches the appropriate product ID
+        vendor_id: 2, // Ensure this matches the appropriate vendor ID
+        warehouse_id: 2, // Ensure this matches the appropriate warehouse ID
+        quantity: 100,
+        order_date: new Date(),
+      },
+    ],
   });
 
-  const order2 = await prisma.order.create({
-    data: {
-      customer_id: customer2.id,
-      user_id: normalUser.user_id,
-      order_status: "Completed",
-    },
+  // Seeder for PrefixSequence
+  await prisma.prefixSequence.createMany({
+    data: [
+      {
+        prefix: "ORD",
+        prefix_id: "ORD001",
+        current_sequence: 1,
+      },
+      {
+        prefix: "INV",
+        prefix_id: "INV001",
+        current_sequence: 1,
+      },
+    ],
   });
 
-  // Create Order Items
-  await prisma.orderItem.create({
-    data: {
-      order_id: order1.order_id,
-      item_type: "Product",
-      item_id: product1.id.toString(),
-      quantity: 2,
-      unit_price: 50.0,
-    },
-  });
-
-  await prisma.orderItem.create({
-    data: {
-      order_id: order2.order_id,
-      item_type: "Product",
-      item_id: product2.id.toString(),
-      quantity: 1,
-      unit_price: 75.0,
-    },
-  });
-
-  // Create Warehouses
-  const warehouse1 = await prisma.warehouse.create({
-    data: {
-      warehouse_name: "Warehouse One",
-      location: "Location 1",
-    },
-  });
-
-  // Create Vendors
-  const vendor1 = await prisma.vendor.create({
-    data: {
-      vendor_name: "Vendor One",
-      vendor_address: "Vendor Address 1",
-      vendor_phone: "1111111111",
-      vendor_tax_number: "TAX001",
-    },
-  });
-
-  // Create Purchase Orders
-  await prisma.purchaseOrder.create({
-    data: {
-      product_id: product1.id,
-      sku: product1.sku,
-      vendor_id: vendor1.vendor_id,
-      warehouse_id: warehouse1.warehouse_id,
-      quantity: 10,
-    },
-  });
-
-  // Create Transactions
-  await prisma.transaction.create({
-    data: {
-      order_id: order1.order_id,
-      user_id: adminUser.user_id,
-      amount: 100.0,
-      transaction_type: "Credit",
-    },
-  });
-
-  // Create Invoices
-  await prisma.invoice.create({
-    data: {
-      order_id: order1.order_id,
-      amount: 100.0,
-      status: "Paid",
-    },
-  });
-
-  // Create Notifications
-  await prisma.userNotification.create({
-    data: {
-      user_id: adminUser.user_id,
-      notification_type: "Email",
-    },
-  });
-
-  // Create Expenses
-  await prisma.expense.create({
-    data: {
-      expense_id: "EXP001",
-      expense_name: "Expense One",
-      description: "Expense Description",
-      amount: 20.0,
-      expense_date: new Date(),
-      category: "Office",
-      user_id: adminUser.user_id,
-    },
-  });
-
-  // Create Prefix Sequences
-  await prisma.prefixSequence.create({
-    data: {
-      prefix: "ORD",
-    },
-  });
-
-  console.log("Database has been seeded");
+  console.log("Seeding completed.");
 }
 
 main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
+  .then(async () => {
     await prisma.$disconnect();
+  })
+  .catch(async (e) => {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
   });

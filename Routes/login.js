@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
 import fp from "fastify-plugin";
 import dotenv from "dotenv";
 
@@ -30,7 +31,6 @@ const loginSchema = {
           type: "object",
           properties: {
             username: { type: "string" },
-            password: { type: "string" },
           },
         },
       },
@@ -71,24 +71,22 @@ export default fp(function (fastify, opts, done) {
 
     try {
       const user = await prisma.user.findUnique({
-        where: { username: username },
+        where: { username },
       });
 
       if (!user) {
         return res.code(401).send({ error: "Invalid username or password" });
       }
 
-      if (!user || user.password !== password) {
-        return res.status(401).json({
-          message: "Invalid username or password",
-        });
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return res.code(401).send({ error: "Invalid username or password" });
       }
 
       const token = jwt.sign(
         {
           user_id: user.user_id,
           username: user.username,
-          password: user.password,
         },
         JWT_SECRET,
         { expiresIn: "12h" }
@@ -96,8 +94,8 @@ export default fp(function (fastify, opts, done) {
 
       res.code(200).send({
         message: "Login successful",
-        token: token,
-        user: { username: user.username, password: user.password },
+        token,
+        user: { username: user.username },
       });
     } catch (error) {
       console.error("Error during login:", error);

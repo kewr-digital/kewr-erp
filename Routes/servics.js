@@ -1,4 +1,3 @@
-import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
 import fp from "fastify-plugin";
 import dotenv from "dotenv";
@@ -9,31 +8,32 @@ const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const serviceSchema = {
-  description: "Services",
+  description: "Create or update a service",
   tags: ["Services"],
   body: {
     type: "object",
-    required: ["service_code", "service_name", "unit_price"],
+    required: ["service_code", "service_name", "unit_price", "customer_id"],
     properties: {
       service_code: { type: "string" },
       service_name: { type: "string" },
       unit_price: { type: "number" },
+      customer_id: { type: "number" },
     },
   },
   response: {
     200: {
-      description: "Successful service",
+      description: "Successful operation",
       type: "object",
       properties: {
         message: { type: "string" },
-        token: { type: "string" },
-        user: {
+        service: {
           type: "object",
           properties: {
             id: { type: "number" },
             service_code: { type: "string" },
             service_name: { type: "string" },
             unit_price: { type: "number" },
+            customer_id: { type: "number" },
           },
         },
       },
@@ -63,7 +63,7 @@ const serviceSchema = {
 };
 
 const serviceResponseSchema = {
-  description: "Services",
+  description: "Get all services",
   tags: ["Services"],
   response: {
     200: {
@@ -76,6 +76,21 @@ const serviceResponseSchema = {
           service_code: { type: "string" },
           service_name: { type: "string" },
           unit_price: { type: "number" },
+          customer_id: { type: "number" },
+          customer: {
+            type: "object",
+            properties: {
+              id: { type: "number" },
+              customer_code: { type: "string" },
+              customer_name: { type: "string" },
+              customer_type: { type: "string" },
+              image: { type: "string" },
+              address: { type: "string" },
+              phone: { type: "string" },
+              email: { type: "string" },
+              credit_balance: { type: "number" },
+            },
+          },
         },
       },
     },
@@ -104,7 +119,7 @@ const serviceResponseSchema = {
 };
 
 const deleteServiceResponseSchema = {
-  description: "Service deletion",
+  description: "Delete a service",
   tags: ["Services"],
   response: {
     200: {
@@ -115,6 +130,7 @@ const deleteServiceResponseSchema = {
         service_code: { type: "string" },
         service_name: { type: "string" },
         unit_price: { type: "number" },
+        customer_id: { type: "number" },
       },
     },
     400: {
@@ -131,15 +147,15 @@ const deleteServiceResponseSchema = {
         error: { type: "string" },
       },
     },
-    500: {
-      description: "Internal server error",
+    404: {
+      description: "Service not found",
       type: "object",
       properties: {
         error: { type: "string" },
       },
     },
-    404: {
-      description: "Customer not found",
+    500: {
+      description: "Internal server error",
       type: "object",
       properties: {
         error: { type: "string" },
@@ -154,7 +170,11 @@ export default fp(function (fastify, opts, done) {
     { schema: serviceResponseSchema },
     async (req, res) => {
       try {
-        const services = await prisma.service.findMany();
+        const services = await prisma.service.findMany({
+          include: {
+            customer: true, // Fetch associated customer data
+          },
+        });
         res.code(200).send(services);
       } catch (error) {
         console.error("Error fetching services:", error);
@@ -166,14 +186,22 @@ export default fp(function (fastify, opts, done) {
   );
 
   fastify.post("/services", { schema: serviceSchema }, async (req, res) => {
-    const { id, ...newService } = req.body;
+    const { service_code, service_name, unit_price, customer_id } = req.body;
 
     try {
       const createdService = await prisma.service.create({
-        data: newService,
+        data: {
+          service_code,
+          service_name,
+          unit_price,
+          customer: { connect: { id: customer_id } },
+        },
       });
 
-      res.code(200).send(createdService);
+      res.code(200).send({
+        message: "Service created successfully",
+        service: createdService,
+      });
     } catch (error) {
       console.error("Error creating service:", error);
       res.code(500).send({ error: "An error occurred while creating service" });
@@ -185,17 +213,22 @@ export default fp(function (fastify, opts, done) {
     { schema: serviceSchema },
     async (req, res) => {
       const { serviceId } = req.params;
-      const updatedService = req.body;
+      const { service_code, service_name, unit_price, customer_id } = req.body;
 
       try {
-        const service = await prisma.service.update({
+        const updatedService = await prisma.service.update({
           where: { id: Number(serviceId) },
-          data: updatedService,
+          data: {
+            service_code,
+            service_name,
+            unit_price,
+            customer_id,
+          },
         });
 
         res.code(200).send({
-          message: "service updated successfully",
-          service,
+          message: "Service updated successfully",
+          service: updatedService,
         });
       } catch (error) {
         console.error("Error updating service:", error);

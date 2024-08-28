@@ -100,6 +100,15 @@ const customerResponseSchema = {
           phone: { type: "string" },
           email: { type: "string" },
           credit_balance: { type: "number" },
+          service: {
+            type: "object",
+            properties: {
+              id: { type: "number" },
+              service_code: { type: "string" },
+              service_name: { type: "string" },
+              unit_price: { type: "number" },
+            },
+          },
         },
       },
     },
@@ -183,7 +192,11 @@ export default fp(function (fastify, opts, done) {
     { schema: customerResponseSchema },
     async (req, res) => {
       try {
-        const customers = await prisma.customer.findMany();
+        const customers = await prisma.customer.findMany({
+          include: {
+            services: true,
+          },
+        });
         return res.code(200).send(customers);
       } catch (error) {
         console.error("Error fetching customers:", error);

@@ -7,7 +7,11 @@ import customer from "./Routes/customer.js";
 import product from "./Routes/product.js";
 import service from "./Routes/servics.js";
 import expenses from "./Routes/expenses.js";
+import pic from "./Routes/pic.js";
+import warehouse from "./Routes/warehouse.js";
+import vendor from "./Routes/vendor.js";
 import cors from "@fastify/cors";
+import transaction from "./Routes/transaction.js";
 
 dotenv.config();
 
@@ -25,7 +29,11 @@ async function main() {
   fastify.register(customer);
   fastify.register(product);
   fastify.register(service);
+  fastify.register(pic);
   fastify.register(expenses);
+  fastify.register(warehouse);
+  fastify.register(vendor);
+  fastify.register(transaction);
 
   const corsOptions = {
     origin: "*",

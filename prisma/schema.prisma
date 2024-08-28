@@ -8,18 +8,20 @@ datasource db {
 }
 
 model Role {
-  role_id   String @id @default(uuid())
+  id        Int @id @default(autoincrement())
+  role_id   String @unique
   role_name String
-  users User[]
+  users     User[]
 }
 
 model User {
-  user_id      Int    @id @default(autoincrement())
-  username     String @unique
+  id           Int      @id @default(autoincrement())
+  user_id      String   @unique
+  username     String   @unique
   password     String
   role_id      String
   account_name String
-  email        String   
+  email        String   @unique
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
 
@@ -29,12 +31,12 @@ model User {
   pics           PIC[]
   expenses       Expense[]
   notifications  UserNotification[]
-  transactions   Transaction[]      
+  transactions   Transaction[]
 }
 
 model Customer {
-  id             Int @id @default(autoincrement())
-  customer_id    String
+  id             Int    @id @default(autoincrement())
+  customer_id    String @unique
   customer_name  String
   customer_type  String
   image          String
@@ -43,15 +45,18 @@ model Customer {
   email          String @unique
   credit_balance Float
 
-  orders Order[]
+  services       Service[]
+  orders         Order[]
+
 }
 
+
 model Product {
-  id            Int    @id @default(autoincrement())
-  sku           String @unique
-  product_name  String
-  unit_price    Float
-  purchase_orders PurchaseOrder[] 
+  id              Int    @id @default(autoincrement())
+  sku             String @unique
+  product_name    String
+  unit_price      Float
+  purchase_orders PurchaseOrder[]
 }
 
 model Service {
@@ -59,17 +64,21 @@ model Service {
   service_code  String @unique
   service_name  String
   unit_price    Float
+  customer_id   Int
+
+  customer      Customer @relation(fields: [customer_id], references: [id], onDelete: Cascade)
 }
 
 model Order {
-  order_id     String   @id @default(uuid())
-  order_date   DateTime @default(now())
+  id           Int      @id @default(autoincrement())
+  order_id     String   @unique
+  order_date   DateTime
   customer_id  Int
   user_id      Int
   order_status String
   
   customer     Customer     @relation(fields: [customer_id], references: [id], onDelete: Cascade)
-  user         User         @relation(fields: [user_id], references: [user_id])
+  user         User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
   items        OrderItem[]
   approvals    ApprovalLog[]
   payments     PaymentHistory[]
@@ -78,38 +87,42 @@ model Order {
 }
 
 model OrderItem {
-  order_item_id Int    @id @default(autoincrement())
-  order_id      String
+  id            Int    @id @default(autoincrement())
+  order_item_id String @unique
+  order_id      Int
   item_type     String
-  item_id       String
+  item_id       Int
   quantity      Int
   unit_price    Float
 
-  order Order @relation(fields: [order_id], references: [order_id])
+  order Order @relation(fields: [order_id], references: [id], onDelete: Cascade)
 }
 
 model ApprovalLog {
-  log_id        String   @id @default(uuid())
-  order_id      String
-  approval_date DateTime @default(now())
+  id            Int      @id @default(autoincrement())
+  log_id        String   @unique
+  order_id      Int
+  approval_date DateTime
   user_id       Int
   status        Boolean
 
-  order Order @relation(fields: [order_id], references: [order_id])
-  user  User  @relation(fields: [user_id], references: [user_id])
+  order Order @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model PaymentHistory {
-  payment_id   String   @id @default(uuid())
-  order_id     String
+  id           Int      @id @default(autoincrement())
+  payment_id   String   @unique
+  order_id     Int
   amount_paid  Float
-  payment_date DateTime @default(now())
+  payment_date DateTime
 
-  order Order @relation(fields: [order_id], references: [order_id])
+  order Order @relation(fields: [order_id], references: [id], onDelete: Cascade)
 }
 
 model Warehouse {
-  warehouse_id   String @id @default(uuid())
+  id             Int    @id @default(autoincrement())
+  warehouse_id   String @unique
   warehouse_name String
   location       String
 
@@ -118,16 +131,18 @@ model Warehouse {
 }
 
 model PIC {
-  pic_id       String @id @default(uuid())
+  id           Int    @id @default(autoincrement())
+  pic_id       String @unique
   user_id      Int
-  warehouse_id String
+  warehouse_id Int
 
-  user      User      @relation(fields: [user_id], references: [user_id])
-  warehouse Warehouse @relation(fields: [warehouse_id], references: [warehouse_id])
+  user      User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  warehouse Warehouse @relation(fields: [warehouse_id], references: [id], onDelete: Cascade)
 }
 
 model Vendor {
-  vendor_id         String @id @default(uuid())
+  id                Int    @id @default(autoincrement())
+  vendor_id         String @unique
   vendor_name       String
   vendor_address    String
   vendor_phone      String
@@ -137,53 +152,56 @@ model Vendor {
 }
 
 model PurchaseOrder {
-  purchase_order_id String @id @default(uuid())
+  id                Int      @id @default(autoincrement())
+  purchase_order_id String   @unique
   product_id        Int
-  sku               String
-  vendor_id         String
-  warehouse_id      String
+  vendor_id         Int
+  warehouse_id      Int
   quantity          Int
   order_date        DateTime @default(now())
 
-  product   Product   @relation(fields: [product_id], references: [id])
-  vendor    Vendor    @relation(fields: [vendor_id], references: [vendor_id])
-  warehouse Warehouse @relation(fields: [warehouse_id], references: [warehouse_id])
+  product   Product   @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  vendor    Vendor    @relation(fields: [vendor_id], references: [id], onDelete: Cascade)
+  warehouse Warehouse @relation(fields: [warehouse_id], references: [id], onDelete: Cascade)
 }
 
 model Transaction {
-  transaction_id   String   @id @default(uuid())
-  transaction_date DateTime @default(now())
-  order_id         String
+  id               Int      @id @default(autoincrement())
+  transaction_id   String   @unique
+  transaction_date DateTime
+  order_id         Int
   user_id          Int
   amount           Float
   transaction_type String
 
-  user  User  @relation(fields: [user_id], references: [user_id])
-  order Order @relation(fields: [order_id], references: [order_id])
+  user  User  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  order Order @relation(fields: [order_id], references: [id], onDelete: Cascade)
 }
 
 model Invoice {
-  invoice_id   String   @id @default(uuid())
-  order_id     String
-  invoice_date DateTime @default(now())
+  id           Int      @id @default(autoincrement())
+  invoice_id   String   @unique
+  order_id     Int
+  invoice_date DateTime
   amount       Float
   status       String
 
-  order Order @relation(fields: [order_id], references: [order_id])
+  order Order @relation(fields: [order_id], references: [id], onDelete: Cascade)
 }
 
 model UserNotification {
-  notification_id   String @id @default(uuid())
+  id                Int     @id @default(autoincrement())
+  notification_id   String  @unique
   user_id           Int
   notification_type String
   is_enabled        Boolean @default(true)
 
-  user User @relation(fields: [user_id], references: [user_id])
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model Expense {
-  id           Int  @id @default(autoincrement())
-  expense_id   String
+  id           Int      @id @default(autoincrement())
+  expense_id   String   @unique
   expense_name String
   description  String
   amount       Float
@@ -191,10 +209,12 @@ model Expense {
   category     String
   user_id      Int
 
-  user User @relation(fields: [user_id], references: [user_id])
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model PrefixSequence {
-  prefix           String @id
-  current_sequence Int    @default(0)
+  id               Int    @id @default(autoincrement())
+  prefix           String
+  prefix_id        String @unique
+  current_sequence Int
 }
